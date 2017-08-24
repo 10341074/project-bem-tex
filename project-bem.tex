@@ -1,0 +1,399 @@
+\documentclass[10pt, a4paper, twoside, openright]{article}
+% \documentclass{book}
+\usepackage[english, italian]{babel}
+% \usepackage[italian, english]{babel}
+\usepackage[utf8]{inputenc} % needed for bibtex
+\usepackage{mathrsfs}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+%\usepackage{nccmath} % mfrac
+%\mathbb needs amsfonts or amssymb
+\usepackage{amsfonts}
+\usepackage{bm} % bold symbols math
+
+% \usepackage[overload]{empheq} % left\{ for align % no crash kile ?
+\usepackage{cases}
+\usepackage[usenames,dvipsnames]{xcolor} % before tikz, options for more colors
+\definecolor{light-gray}{gray}{0.95}
+
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subfig}
+% \captionsetup[figure]{width=.85\textwidth}
+\captionsetup[subfigure]{margin=0.5cm}
+\usepackage{tikz}
+\usetikzlibrary{matrix}
+\usetikzlibrary{positioning}
+% set arrows as stealth fighter jets
+\tikzset{>=stealth}
+% bezier
+\usetikzlibrary{decorations.pathreplacing}
+\tikzset{%
+  show curve controls/.style={
+    postaction={
+      decoration={
+        show path construction,
+        curveto code={
+          \draw [blue] 
+            (\tikzinputsegmentfirst) -- (\tikzinputsegmentsupporta)
+            (\tikzinputsegmentlast) -- (\tikzinputsegmentsupportb);
+          \fill [red, opacity=0.5] 
+            (\tikzinputsegmentsupporta) circle [radius=.5ex]
+            (\tikzinputsegmentsupportb) circle [radius=.5ex];
+        }
+      },
+      decorate
+}}}
+\tikzstyle{mybox} = [draw=gray, fill=light-gray, very thick,
+    rectangle, rounded corners, inner sep=10pt, inner ysep=20pt]
+\tikzstyle{mytitle} =[fill=gray, text=white]
+
+% plots
+\usepackage{pgfplots}
+
+%\usepackage{color}
+
+\usepackage{xcolor}
+\definecolor{bookColor}{cmyk}{1	, 1  , 0   , 0}  % 0.90\% of black
+%\color{bookColor}
+
+\usepackage{hyperref}
+\hypersetup{pdftex,colorlinks=true,allcolors=blue}
+\usepackage{hypcap}
+\usepackage{etoolbox}
+
+\usepackage{csquotes}
+%\usepackage[autostyle, italian=guillemets]{csquotes}
+
+% \usepackage[chapter]{placeins} % floatbarrier
+
+\usepackage[backend=biber, style=alphabetic]{biblatex}
+\addbibresource{sources.bib}
+
+\numberwithin{equation}{section}
+
+\theoremstyle{definition}
+\newtheorem{definition}[subsection]{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}[subsection]{Theorem}
+\theoremstyle{plain}
+\newtheorem{corollary}[subsection]{Corollary}
+\theoremstyle{plain}
+\newtheorem{proposition}[subsection]{Proposition}
+\theoremstyle{plain}
+\newtheorem{remark}[subsection]{Remark}
+\theoremstyle{plain}
+\newtheorem{lemma}[subsection]{Lemma}
+\theoremstyle{plain}
+\newtheorem{example}[subsection]{Example}
+
+\theoremstyle{plain}
+\newtheorem{assumption}[subsection]{Assumption}
+\theoremstyle{plain}
+\newtheorem{problem}[subsection]{Problem}
+
+\DeclareMathOperator{\divergence}{div}
+\DeclareMathOperator{\curl}{curl}
+\DeclareMathOperator{\real}{Re}
+\DeclareMathOperator{\imag}{Im}
+
+\providetoggle{verbose}
+\settoggle{verbose}{true}
+\providetoggle{old}
+\settoggle{old}{false}
+\providetoggle{fig}
+\settoggle{fig}{true}
+% \toggletrue{paper}
+% \togglefalse{paper}
+\renewcommand{\i}{\textup{i}}
+\let\phi\varphi
+\let\epsilon\varepsilon
+
+\newcommand{\upin}{\textup{ in }}
+\newcommand{\upon}{\textup{ on }}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amssymb,tikz}
+
+\newcommand{\mysetminusD}{\hbox{\tikz{\draw[line width=0.6pt,line cap=round] (3pt,0) -- (0,6pt);}}}
+\newcommand{\mysetminusT}{\mysetminusD}
+\newcommand{\mysetminusS}{\hbox{\tikz{\draw[line width=0.45pt,line cap=round] (2pt,0) -- (0,4pt);}}}
+\newcommand{\mysetminusSS}{\hbox{\tikz{\draw[line width=0.4pt,line cap=round] (1.5pt,0) -- (0,3pt);}}}
+
+\newcommand{\mysetminus}{\mathbin{\mathchoice{\mysetminusD}{\mysetminusT}{\mysetminusS}{\mysetminusSS}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\usepackage{environ}
+\NewEnviron{mybox}{%
+\begin{center}
+\colorbox{light-gray}{\color{black}\parbox{\textwidth}{%
+% \fcolorbox{gray}{light-gray}{
+\BODY
+}}
+\end{center}
+}
+
+\usepackage{fancyhdr}
+\newcommand{\fncyblank}{\fancyhf{}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% abstract already defined
+% \newenvironment{abstract} %
+% {\cleardoublepage\fncyblank\null\vfill\begin{center} %
+% \bfseries\abstractname\end{center}} %
+% {\vfill\null}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{The Boundary Integral Method}
+\author{Giacomo Milan}
+% \date{3 Ottobre 2017} % oppure anno accademico
+
+\begin{document}
+\maketitle
+\tableofcontents
+% \listoffigures
+%\listoftables
+
+\section{Boundary Integral Equations BIE}
+In this section we introduce the theory of Boundary Integral Equations BIE considering as boundary 
+value problem BVP the Laplace equation in an open set $\Omega$ of class $C^2$
+\begin{eqnarray}
+ \Delta u = 0, & \textup{ in }\Omega,\label{eq:laplace-in}\\
+ u = g, & \textup{ on }\partial\Omega.\label{eq:laplace-on}
+\end{eqnarray}
+The aim is to represent the solution $u$ through \emph{representation formulas} 
+in terms of its boundary data $u|_{\partial \Omega}$, $\partial_\nu u|_{\partial \Omega}$, and 
+of $\Delta u$. 
+We generalize the previous example to the problem $Lu = f$ in $\mathcal{D}'(\Omega)$, in the 
+distributional sense, denoting by $L$ a differential operator with smooth coefficients.
+Let $\Phi(z,z_0)$ denote the \emph{fundamental solution} which solves
+\begin{equation}
+\label{eq:fundamental-solution}
+ L\Phi=\delta_{z_0},\quad\upin\mathcal{D}'(\mathbb{R}^m).
+\end{equation}
+For the Laplace equation with $L=-\Delta$, it can be explicitly expressed as
+\begin{equation}
+\label{eq:definition-Phi-23}
+  \Phi(x,x_0)=
+  \left\{
+  \begin{aligned}
+   &\dfrac{1}{2\pi}\log\dfrac{1}{| x - x_0|}, && m=2, \\
+   &\dfrac{1}{4\pi}\dfrac{1}{| x  - x_0|}, && m=3.
+  \end{aligned}
+  \right.
+\end{equation}
+Let $\Omega$ be a domain of class $C^2$ (or even Lipschitz regular),
+and $u \in C^2(\Omega)\cap C^1(\overline{\Omega})$,
+than, by classical Green's formula,
+there holds the following integral representation formula
+\begin{equation}
+  \label{eq:representation-formula}
+  - u(z_0) = \int_\Omega\Delta u\,\Phi_{z_0}\,dz 
+  + \int_{\partial \Omega}\big(u\, \partial_{\nu(z)} \Phi_{z_0}
+  - \partial_\nu u\,\Phi_{z_0}\big)\,dz, \quad z_0 \in \Omega.
+\end{equation}
+% \begin{proposition}[Classical Green's Representation]
+%  Let $D$ be a Lipschitz domain and $u,v \in C^2(D)\cap C^1(\overline{D})$ be regular functions, then integration by parts can be expressed as
+%   \begin{equation}
+%   \int_D (u \, \Delta v - \Delta u \, v)\, dx = \int_{\partial D}(u \, \partial_\nu v - \partial_\nu u \, v)\,d\sigma = \mathcal{R}_{\partial D}(u,v).
+%   \end{equation}
+% \end{proposition}
+% \begin{proposition}[Representation of harmonics]
+%  Indeed formally, for distributions in $\mathbb{R}^m$ which take to account the boundary of $D$, $\langle u,\Delta_p\Phi(p,p_0)\rangle = \langle u,-\delta_{p_0}\rangle = - u(p_0)$.
+% \end{proposition}
+In our case, any solution $u$ of \eqref{eq:laplace-in} can be represented as
+\begin{equation}
+  \label{eq:representation-formula-harmonics}
+  - u(z_0) = \int_{\partial \Omega}\big(u\, \partial_{\nu(z)} \Phi_{z_0}
+  - \partial_\nu u\,\Phi_{z_0}\big)\,dz, \quad z_0 \in \Omega,
+\end{equation}
+as the sum of two layer potentials defined on $\partial\Omega$.
+Given a density $\psi\in C(\partial \Omega)$, we define
+\begin{enumerate}
+  \item the \emph{single layer} potential
+   \begin{equation}
+    \mathcal{S}(\partial \Omega,\psi)(x)\coloneqq \int_{\partial \Omega} \Phi(x, y)\psi(y)\, dy,\quad x\in\mathbb{R}^m \backslash\partial \Omega, \label{eq:definition-single-layer}
+   \end{equation}
+  \item the \emph{double layer} potential
+   \begin{equation}
+    \mathcal{D}(\partial \Omega,\psi)(x)\coloneqq \int_{\partial \Omega} \partial_{\nu(y)}\Phi(x, y)\psi(y)\, dy,\quad x\in\mathbb{R}^m \backslash\partial \Omega. \label{eq:definition-double-layer}
+   \end{equation}
+\end{enumerate}
+For a domain $\Omega$ of class $C^2$, there hold the well known \emph{jump relation}
+which can be written as
+\begin{equation}
+\label{eq:jump-relations}
+ [\partial_\nu\mathcal{S}]_{\partial \Omega} = -\psi,
+ \quad
+ [\mathcal{D}]_{\partial \Omega} = \psi.
+\end{equation}
+These relations can be written more detailed through integral operators 
+$S, K, K': C(\partial \Omega)\to C(\partial \Omega)$, with the same expression
+of the previous layer potentials (see Theorem \ref{theo:jump-relations} in the Appendix). 
+We remark that they are well defined for a regular 
+boundary $\partial\Omega$, thanks to the non trivial convergence of the integral of 
+the singularity contained in the fundamental solution $\Phi$.
+\par
+The derivation of representation formulas can be done more rigorously in the 
+distributional framework, introducing the notion of pseudo-differential operators.
+\par
+The solution of problem \eqref{eq:laplace-in}--\eqref{eq:laplace-on}, with Dirichlet data
+$g$, through representation \eqref{eq:representation-formula-harmonics} containing 
+the unknown $\partial_\nu u|_{\partial\Omega}$, can proceed in two ways
+\begin{enumerate}
+ \item eliminating the dependence of $\partial_\nu u$, constructing a representation
+ formula with the \emph{Green function} for the homogeneous Neumann problem in $\Omega$, 
+ that is
+  \begin{alignat}{2}
+  -\Delta G &= \delta_{z_0}, && \textup{ in }\Omega,\label{eq:green-neum-in}\\
+  \partial_\nu G &= 0, && \textup{ on }\partial\Omega;\label{eq:green-neum-on}
+  \end{alignat}
+  \item finding an equation for $\partial_\nu u$. 
+\end{enumerate}
+We will follow the second approach, taking advantage of jump relations previously stated,
+to derive a \emph{boundary integral equation}.
+% We briefly present the main notions of potential theory, which we'll use in the sequel.
+\appendix
+\section{Potential Theory}
+% \begin{definition}
+%  \label{def:layer-potentials}
+%  We define the following integral functions, for $\partial D$ of class $C^2$ and a 
+% \end{definition}
+\begin{definition}
+ We denote by $S$, $K$  and $K'$ the following integral operators defined on $C(\partial D)$, where $\partial D$ is of class $C^2$
+ \begin{enumerate}
+  \item  $ S: C(\partial D) \to C(\partial D)$
+  \begin{equation}
+  S\psi(x)\coloneqq\int_{\partial D}\psi(y) \Phi(x,y)\,dy,\label{def:operator-S}
+  \end{equation}
+  \item  $ K,K':C(\partial D) \to C(\partial D)$
+  \begin{align}
+  & K\psi(x)\coloneqq\int_{\partial D} \psi(y) \partial_{\nu(y)} \Phi(x, y) \,dy =\int_{\partial D} \psi(y) \nabla_y\Phi(x, y)\cdot\nu(y) \,dy,\label{def:operator-K}\\
+  & K'\psi(x)\coloneqq\int_{\partial D} \psi(y) \partial_{\nu(x)} \Phi(x, y) \,dy =\int_{\partial D} \psi(y) \nabla_x\Phi(x, y)\cdot\nu(x) \,dy.\label{def:operator-K'}
+  \end{align}
+ \end{enumerate}
+\end{definition}
+\begin{theorem}
+\label{theo:jump-relations}
+ Let $\psi\in C(\partial D)$, $\partial D$ be of class $C^2$, and let 
+ $\mathcal{S}(\psi,\partial D)$, $\mathcal{D}(\psi,\partial D)$ be the potentials in 
+ Definition \ref{def:layer-potentials}, then
+ \begin{enumerate}
+  \item the single layer is continuous and 
+  \begin{subequations}
+  \begin{align}
+   \mathcal{S}^\pm(z) &\coloneqq\lim_{h\to 0^\pm}\mathcal{S}(z+h\nu(z)) = S\psi(z)=\int_{\partial D}\psi(y)\Phi(z,y)\,dy \quad z\in\partial D, \label{eq:single-pm-0}\\
+   \partial_\nu\mathcal{S}^\pm(z) &\coloneqq \lim_{h\to0^\pm} \nabla\mathcal{S}(z+h\nu(z))\cdot\nu(z) =  K'\psi(z) \,\mp\,\dfrac{1}{2}\psi(z) \quad z\in\partial D,\label{eq:single-pm-1}
+  \end{align}
+ \end{subequations}
+ \item the double layer can be continuously extended from $D$ to $\overline{D}$, from $\mathbb{R}^m\backslash \overline{D}$ to $\mathbb{R}^m\backslash D$, and
+  \begin{subequations}
+  \begin{align}
+   \mathcal{D}^\pm(z) &= K\psi(z) \pm\dfrac{1}{2}\psi(z)\quad z\in\partial D, \label{eq:double-pm-0}\\
+   \partial_\nu\mathcal{D}^+(z) &= \partial_\nu\mathcal{D}^-(z) \quad z\in\partial D. \label{eq:double-pm-1}
+  \end{align}
+  \end{subequations}
+ \end{enumerate}
+\end{theorem}
+
+
+The formula \eqref{eq:representation-formula-harmonics} can be extended to $z_0 \in 
+\mathbb{R}^m\backslash\partial\Omega$ and 
+
+The rigorous derivation of the 
+representation formulas 
+
+% \include{notes/chapter-direct.tex}
+
+%\nocite{*}
+\printbibliography % biber
+% \bibliographystyle{plain} % bibtex
+% \bibliography{sources} % bibtex
+\end{document}
+
+\colorbox{Orchid}{
+
+% \framebox[0.5\textwidth][l]{
+ \parbox{0.5\textwidth}{
+  in evidenza:
+  \begin{description}
+         \item[parola chiave 1]: ...sssss;
+         \item[parola chiave 2]: ....
+  \end{description}
+
+ }
+%  }
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{alignat}{2}[left=\empheqlbrace]
+ & u_t = H(x,t,Du) & \quad&\text{in }\mathbb{R}^n × (0,T) \\[\medskipamount]
+  & u(x,0)=u_0(x) & &\text{in } \mathbb{R}^n
+\end{alignat}
+\vskip 1cm
+
+\begin{subequations}
+\begin{alignat}{2}[left=\empheqlbrace]
+ & u_t = H(x,t,Du) &\quad & \text{in }\mathbb{R}^n × (0,T) \\[\medskipamount]
+ & u(x,0)=u_0(x) & & \text{in } \mathbb{R}^n
+\end{alignat}
+\end{subequations}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{cases}
+\begin{numcases}{f(x)=}
+   1 & $x\geq0$ \label{positive}
+   \\
+   0 & $x<0$ \label{negative}
+\end{numcases}
+
+See the second case \ref{negative} or the first \ref{positive}
+% first part is ALREADY MATH MODE
+\begin{subnumcases}{f(x)=}
+   1 & $x\geq0$ \label{positive-subnum}
+   \\
+   0 & $x<0$ \label{negative-subnum}
+\end{subnumcases}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\begin{tikzpicture}
+\draw  plot[smooth, tension=0.7] coordinates {(-3.5,0.5) (-3,2.5) (-1,3.5) (1.5,3) (5,2.5) (5,0.5) (2.5,-2) (-3,-2) (-3.5,0.5)};
+\end{tikzpicture}
+\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{tikzpicture}
+% \draw [help lines] (-4, -1) grid (4, 5);
+\draw [show curve controls]
+  (-3, 4) .. controls ++(135:-1) and ++(135:1) .. (0, 4); 
+% \draw [show curve controls] (-1, -1) 
+%   .. controls ++(165:-1) and ++(270: 1) .. ( 1.5, 1)
+  .. controls ++(165:-1) and ++(165:-1) .. ( 0, 1)
+  .. controls ++(165: 1) and ++(90: 1) .. (-2, 1)
+  .. controls ++(90:-1) and ++(165: 1) .. ( -1, -1);
+\end{tikzpicture}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tikzstyle{mybox} = [draw=red, fill=blue!20, very thick,
+    rectangle, rounded corners, inner sep=10pt, inner ysep=20pt]
+\tikzstyle{fancytitle} =[fill=red, text=white]
+
+\begin{tikzpicture}
+\node [mybox] (box){%
+    \begin{minipage}{0.50\textwidth}
+        To calculate the horizontal position the kinematic differential
+        equations are needed:
+        \begin{align}
+            \dot{n} &= u\cos\psi -v\sin\psi \\
+            \dot{e} &= u\sin\psi + v\cos\psi
+        \end{align}
+        For small angles the following approximation can be used:
+        \begin{align}
+            \dot{n} &= u -v\delta_\psi \\
+            \dot{e} &= u\delta_\psi + v
+        \end{align}
+    \end{minipage}
+};
+\node[fancytitle, right=10pt] at (box.north west) {A fancy title};
+\node[fancytitle, rounded corners] at (box.east) {$\clubsuit$};
+\end{tikzpicture}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\centering
+\includegraphics[width=\textwidth]{fig/prova}
