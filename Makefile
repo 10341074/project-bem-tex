@@ -15,7 +15,7 @@ clean: distclean
 bibtex: sources.bib
 	bibtex thesis.aux
 fig-import:
-	-cp ~/Documents/python/venv/runs/fig-thesis/* ./fig/
+	-cp ~/Documents/python/pymesh/fig-thesis/* ~/Documents/python/pymesh/fig-thesis-once/* ./fig/
 fig-convert:
 	# epstopdf ./fig/*.eps ./fig/*.pdf
 	find fig/ . -name "*.eps" -exec epstopdf {} \;

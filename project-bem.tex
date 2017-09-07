@@ -1,6 +1,6 @@
-\documentclass[10pt, a4paper, twoside, openright]{article}
+\documentclass[10pt, a4paper]{article} % , twoside
 % \documentclass{book}
-\usepackage[english, italian]{babel}
+\usepackage[english]{babel}
 % \usepackage[italian, english]{babel}
 \usepackage[utf8]{inputenc} % needed for bibtex
 \usepackage{mathrsfs}
@@ -8,7 +8,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
-%\usepackage{nccmath} % mfrac
+%\usepackage{nccmath} % mfracf
 %\mathbb needs amsfonts or amssymb
 \usepackage{amsfonts}
 \usepackage{bm} % bold symbols math
@@ -71,6 +71,7 @@
 
 \usepackage[backend=biber, style=alphabetic]{biblatex}
 \addbibresource{sources.bib}
+\DeclareFieldFormat[article]{title}{\textit{#1}}
 
 \numberwithin{equation}{section}
 
@@ -113,6 +114,7 @@
 
 \newcommand{\upin}{\textup{ in }}
 \newcommand{\upon}{\textup{ on }}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{amssymb,tikz}
 
@@ -146,23 +148,124 @@
 \title{The Boundary Integral Method}
 \author{Giacomo Milan}
 % \date{3 Ottobre 2017} % oppure anno accademico
+% \usepackage[]{frontespizio}
 
 \begin{document}
-\maketitle
+% \frontmatter
+% \begin{frontespizio}
+% \Universita{Politecnico di Milano}
+% \Facolta{Scienze Matematiche, Fisiche e
+% Naturali}
+% \Corso[Laurea]{Matematica}
+% \Titoletto{Project of the course \\ Advanced Numerical Partial Differential Equations}
+% \Titolo{The Boundary Integral Method}
+% \Candidato[145822]{Giacomo Milan}
+% % \Relatore{Ch.mo Prof.~Adalberto Orsatti}
+% \Annoaccademico{2016-2017}
+% \end{frontespizio}
+\begin{titlepage}
+    \begin{center}
+        \Large
+        \vspace*{1cm}
+        \textsc{Politecnico di Milano}\\
+        Scuola di Ingegneria Industriale e dell'Informazione\\
+        \vspace{1cm}
+        \includegraphics[width=0.5\textwidth]{logo_bw}
+        
+%       \vfill
+        \normalsize
+        \vspace{1cm}
+        Project of \\
+        \large
+        \textsc{Numerical Analysis for Partial Differential Equations}\\
+        \begin{flushright}
+        \normalsize
+         Prof.ssa Perotto
+        \end{flushright}
+%         \vspace{0.5cm}
+        \normalsize
+        Course of \\
+        \large
+        \textsc{Mathematical Engineering}
+        
+
+        \vspace{0.8cm}
+        \huge
+        \textsc{The Boundary Element Method}
+        
+%       \vspace{0.5cm}
+%       Thesis Subtitle
+        
+        \vspace{1.5cm}
+        \begin{flushright}
+        \normalsize
+        {Giacomo Milan, matr. 841530}         
+        \end{flushright}
+        \normalsize
+        \vfill
+        Anno accademico 2016-2017
+        
+    \end{center}
+\end{titlepage}
+% \clearpage
+% \cleardoublepage
+\newpage
+\thispagestyle{empty}
+\mbox{}
+\newpage
+% \maketitle
 \tableofcontents
 % \listoffigures
 %\listoftables
+% \mainmatter
+\clearpage
 
-\section{Boundary Integral Equations BIE}
-In this section we introduce the theory of Boundary Integral Equations BIE considering as boundary 
-value problem BVP the Laplace equation in an open set $\Omega$ of class $C^2$
+\section{Introduction}
+The theoretical origin of the Boundary Element Method can be traced to the nineteenth century,
+when many applications given by the electrostatics, governed by the Laplace equation, 
+led to the development of the \emph{potential theory} 
+and to integral potentials to solve boundary value problems
+(for a detailed early history see \cite{cheng-cheng:history}).
+All the greatest mathematicians gave their contribution to the integral theory, 
+and later to Green's representation formulas, that found many concrete examples in 
+elasticity, fluid  dynamics, acoustic problems.
+\par
+In the pre-electronic computing era, W. Ritz proposed the representation of the solution
+$u(z)=\sum\alpha_i\psi_i(z)$ as the sum of trial functions defined in subdomains, a method 
+that led to FEM. The same approach yielded to the representation 
+$u(z)=\sum\alpha_i\Phi(z,z_i)$ called the \emph{method of fundamental solutions}, with sources
+and sinks collocated in the points $z_i$, distributed on the boundary, or outside the domain.
+The problem was complete with the imposition of the boundary data in the collocation
+nodes.
+\par
+In the electronic computing era we can remember M. A. Jaswon which implemented first discretizations 
+of integral Green's formulas, and V. D. Kupradze, whose approach, called \emph{method of 
+functional equations}, was to represent the solution through auxiliary contours, distinct 
+from the domain's boundary, with the advantage of smooth integral kernels.
+The definitive turning point to \emph{boundary integral equation} BIE and 
+\emph{boundary element method} BEM were given by F. J. Rizzo, T. A. Cruse and 
+C. A. Brebbia who talked about these ideas in 1977 at the First International
+Symposium on Innovative Numerical Analysis in Applied
+Engineering Sciences, at Versailles, France, 
+and in 1978 published the first textbook on BEM
+‘The Boundary Element Method for Engineers' \cite{brebbia:book}.
+In section \ref{section:bie} we will present the derivation of Boundary Integral Equations, 
+and in section \ref{section:bem} we will show the discretization algorithm called Boundary
+Element Method. In \ref{section:bemfem} we compare this method with the Finite Element Method
+and then we will show some numerical results in section \ref{section:num}.
+\section{Boundary Integral Equations}
+\label{section:bie}
+In this section we introduce the theory of Boundary Integral Equations BIE,
+starting from an example of boundary 
+value problem BVP. We consider the Laplace equation in an open set $\Omega$ of class $C^2$
 \begin{eqnarray}
  \Delta u = 0, & \textup{ in }\Omega,\label{eq:laplace-in}\\
  u = g, & \textup{ on }\partial\Omega.\label{eq:laplace-on}
 \end{eqnarray}
 The aim is to represent the solution $u$ through \emph{representation formulas} 
 in terms of its boundary data $u|_{\partial \Omega}$, $\partial_\nu u|_{\partial \Omega}$, and 
-of $\Delta u$. 
+of $\Delta u$.
+\par
 We generalize the previous example to the problem $Lu = f$ in $\mathcal{D}'(\Omega)$, in the 
 distributional sense, denoting by $L$ a differential operator with smooth coefficients.
 Let $\Phi(z,z_0)$ denote the \emph{fundamental solution} which solves
@@ -173,17 +276,17 @@ Let $\Phi(z,z_0)$ denote the \emph{fundamental solution} which solves
 For the Laplace equation with $L=-\Delta$, it can be explicitly expressed as
 \begin{equation}
 \label{eq:definition-Phi-23}
-  \Phi(x,x_0)=
+  \Phi(z,z_0)=
   \left\{
   \begin{aligned}
-   &\dfrac{1}{2\pi}\log\dfrac{1}{| x - x_0|}, && m=2, \\
-   &\dfrac{1}{4\pi}\dfrac{1}{| x  - x_0|}, && m=3.
+   &\dfrac{1}{2\pi}\log\dfrac{1}{| z - z_0|}, && m=2, \\
+   &\dfrac{1}{4\pi}\dfrac{1}{| z  - z_0|}, && m=3.
   \end{aligned}
   \right.
 \end{equation}
 Let $\Omega$ be a domain of class $C^2$ (or even Lipschitz regular),
 and $u \in C^2(\Omega)\cap C^1(\overline{\Omega})$,
-than, by classical Green's formula,
+then, by classical Green's formula,
 there holds the following integral representation formula
 \begin{equation}
   \label{eq:representation-formula}
@@ -200,7 +303,7 @@ there holds the following integral representation formula
 % \begin{proposition}[Representation of harmonics]
 %  Indeed formally, for distributions in $\mathbb{R}^m$ which take to account the boundary of $D$, $\langle u,\Delta_p\Phi(p,p_0)\rangle = \langle u,-\delta_{p_0}\rangle = - u(p_0)$.
 % \end{proposition}
-In our case, any solution $u$ of \eqref{eq:laplace-in} can be represented as
+In our case, any solution $u$ of \eqref{eq:laplace-in} can be represented
 \begin{equation}
   \label{eq:representation-formula-harmonics}
   - u(z_0) = \int_{\partial \Omega}\big(u\, \partial_{\nu(z)} \Phi_{z_0}
@@ -211,28 +314,67 @@ Given a density $\psi\in C(\partial \Omega)$, we define
 \begin{enumerate}
   \item the \emph{single layer} potential
    \begin{equation}
-    \mathcal{S}(\partial \Omega,\psi)(x)\coloneqq \int_{\partial \Omega} \Phi(x, y)\psi(y)\, dy,\quad x\in\mathbb{R}^m \backslash\partial \Omega, \label{eq:definition-single-layer}
+    \mathcal{S}(\partial \Omega,\psi)(z_0)\coloneqq \int_{\partial \Omega} \Phi(z_0, z)\psi(z)\, dz,\quad z_0\in\mathbb{R}^m \backslash\partial \Omega, \label{eq:definition-single-layer}
    \end{equation}
   \item the \emph{double layer} potential
    \begin{equation}
-    \mathcal{D}(\partial \Omega,\psi)(x)\coloneqq \int_{\partial \Omega} \partial_{\nu(y)}\Phi(x, y)\psi(y)\, dy,\quad x\in\mathbb{R}^m \backslash\partial \Omega. \label{eq:definition-double-layer}
+    \mathcal{D}(\partial \Omega,\psi)(z_0)\coloneqq \int_{\partial \Omega} \partial_{\nu(z)}\Phi(z_0, z)\psi(z)\, dz,\quad z_0\in\mathbb{R}^m \backslash\partial \Omega. \label{eq:definition-double-layer}
    \end{equation}
 \end{enumerate}
-For a domain $\Omega$ of class $C^2$, there hold the well known \emph{jump relation}
-which can be written as
-\begin{equation}
-\label{eq:jump-relations}
- [\partial_\nu\mathcal{S}]_{\partial \Omega} = -\psi,
- \quad
- [\mathcal{D}]_{\partial \Omega} = \psi.
-\end{equation}
-These relations can be written more detailed through integral operators 
-$S, K, K': C(\partial \Omega)\to C(\partial \Omega)$, with the same expression
-of the previous layer potentials (see Theorem \ref{theo:jump-relations} in the Appendix). 
+These potentials are analytic in $\mathbb{R}^m\backslash\partial\Omega$,
+while along the boundary $\partial\Omega$ there hold the well known \emph{jump relations}, 
+which can be expressed through the integral operators 
+$S, K, K': C(\partial \Omega)\to C(\partial \Omega)$.
+\begin{definition}
+ We denote by $S$, $K$  and $K'$ the following integral operators 
+ defined on $C(\partial \Omega)$, where $\partial \Omega$ is of class $C^2$
+ \begin{enumerate}
+  \item  $ S: C(\partial \Omega) \to C(\partial \Omega)$
+  \begin{equation}
+  S\psi(z_0)\coloneqq\int_{\partial \Omega}\psi(z) \Phi(z_0,z)\,dz,\label{def:operator-S}
+  \end{equation}
+  \item  $ K,K':C(\partial \Omega) \to C(\partial \Omega)$
+  \begin{align}
+  & K\psi(z_0)\coloneqq\int_{\partial \Omega} \psi(z) \partial_{\nu(z)} \Phi(z_0, z) \,dz =
+  \int_{\partial \Omega} \psi(z) \nabla_z\Phi(z_0, z)\cdot\nu(z) \,dz,\label{def:operator-K}\\
+  & K'\psi(z_0)\coloneqq\int_{\partial \Omega} \psi(z) \partial_{\nu(z_0)} \Phi(z_0, z) \,dz =
+  \int_{\partial \Omega} \psi(z) \nabla_{z_0}\Phi(z_0, z)\cdot\nu(z_0) \,dz.\label{def:operator-K'}
+  \end{align}
+ \end{enumerate}
+\end{definition}
+\begin{theorem}
+\label{theo:jump-relations}
+ Let $\psi\in C(\partial \Omega)$, $\partial \Omega$ be of class $C^2$, and let 
+ $\mathcal{S}(\psi,\partial \Omega)$, $\mathcal{D}(\psi,\partial \Omega)$ be the potentials 
+ defined in \eqref{eq:definition-single-layer} and \eqref{eq:definition-double-layer}, then
+ \begin{enumerate}
+  \item the single layer is continuous and 
+  \begin{subequations}
+  \begin{align}
+   \mathcal{S}^\pm(z) &\coloneqq\lim_{h\to 0^\pm}\mathcal{S}(z+h\nu(z)) = S\psi(z)=\int_{\partial \Omega}\psi(y)\Phi(z,y)\,dy \quad z\in\partial \Omega, \label{eq:single-pm-0}\\
+   \partial_\nu\mathcal{S}^\pm(z) &\coloneqq \lim_{h\to0^\pm} \nabla\mathcal{S}(z+h\nu(z))\cdot\nu(z) =  K'\psi(z) \,\mp\,\dfrac{1}{2}\psi(z) \quad z\in\partial \Omega,\label{eq:single-pm-1}
+  \end{align}
+ \end{subequations}
+ \item the double layer can be continuously extended from $\Omega$ to $\overline{\Omega}$, from $\mathbb{R}^m\backslash \overline{\Omega}$ to $\mathbb{R}^m\backslash \Omega$, and
+  \begin{subequations}
+  \begin{align}
+   \mathcal{D}^\pm(z) &= K\psi(z) \pm\dfrac{1}{2}\psi(z)\quad z\in\partial \Omega, \label{eq:double-pm-0}\\
+   \partial_\nu\mathcal{D}^+(z) &= \partial_\nu\mathcal{D}^-(z) \quad z\in\partial \Omega. \label{eq:double-pm-1}
+  \end{align}
+  \end{subequations}
+ \end{enumerate}
+\end{theorem}
+% For a domain $\Omega$ of class $C^2$, there hold the well known \emph{jump relations}
+% which can be written as
+% \begin{equation}
+% \label{eq:jump-relations}
+%  [\partial_\nu\mathcal{S}]_{\partial \Omega} = -\psi,
+%  \quad
+%  [\mathcal{D}]_{\partial \Omega} = \psi.
+% \end{equation}
 We remark that they are well defined for a regular 
 boundary $\partial\Omega$, thanks to the non trivial convergence of the integral of 
 the singularity contained in the fundamental solution $\Phi$.
-\par
 The derivation of representation formulas can be done more rigorously in the 
 distributional framework, introducing the notion of pseudo-differential operators.
 \par
@@ -251,59 +393,694 @@ the unknown $\partial_\nu u|_{\partial\Omega}$, can proceed in two ways
 \end{enumerate}
 We will follow the second approach, taking advantage of jump relations previously stated,
 to derive a \emph{boundary integral equation}.
-% We briefly present the main notions of potential theory, which we'll use in the sequel.
-\appendix
-\section{Potential Theory}
-% \begin{definition}
-%  \label{def:layer-potentials}
-%  We define the following integral functions, for $\partial D$ of class $C^2$ and a 
-% \end{definition}
-\begin{definition}
- We denote by $S$, $K$  and $K'$ the following integral operators defined on $C(\partial D)$, where $\partial D$ is of class $C^2$
- \begin{enumerate}
-  \item  $ S: C(\partial D) \to C(\partial D)$
-  \begin{equation}
-  S\psi(x)\coloneqq\int_{\partial D}\psi(y) \Phi(x,y)\,dy,\label{def:operator-S}
-  \end{equation}
-  \item  $ K,K':C(\partial D) \to C(\partial D)$
-  \begin{align}
-  & K\psi(x)\coloneqq\int_{\partial D} \psi(y) \partial_{\nu(y)} \Phi(x, y) \,dy =\int_{\partial D} \psi(y) \nabla_y\Phi(x, y)\cdot\nu(y) \,dy,\label{def:operator-K}\\
-  & K'\psi(x)\coloneqq\int_{\partial D} \psi(y) \partial_{\nu(x)} \Phi(x, y) \,dy =\int_{\partial D} \psi(y) \nabla_x\Phi(x, y)\cdot\nu(x) \,dy.\label{def:operator-K'}
-  \end{align}
- \end{enumerate}
-\end{definition}
-\begin{theorem}
-\label{theo:jump-relations}
- Let $\psi\in C(\partial D)$, $\partial D$ be of class $C^2$, and let 
- $\mathcal{S}(\psi,\partial D)$, $\mathcal{D}(\psi,\partial D)$ be the potentials in 
- Definition \ref{def:layer-potentials}, then
- \begin{enumerate}
-  \item the single layer is continuous and 
-  \begin{subequations}
-  \begin{align}
-   \mathcal{S}^\pm(z) &\coloneqq\lim_{h\to 0^\pm}\mathcal{S}(z+h\nu(z)) = S\psi(z)=\int_{\partial D}\psi(y)\Phi(z,y)\,dy \quad z\in\partial D, \label{eq:single-pm-0}\\
-   \partial_\nu\mathcal{S}^\pm(z) &\coloneqq \lim_{h\to0^\pm} \nabla\mathcal{S}(z+h\nu(z))\cdot\nu(z) =  K'\psi(z) \,\mp\,\dfrac{1}{2}\psi(z) \quad z\in\partial D,\label{eq:single-pm-1}
-  \end{align}
- \end{subequations}
- \item the double layer can be continuously extended from $D$ to $\overline{D}$, from $\mathbb{R}^m\backslash \overline{D}$ to $\mathbb{R}^m\backslash D$, and
-  \begin{subequations}
-  \begin{align}
-   \mathcal{D}^\pm(z) &= K\psi(z) \pm\dfrac{1}{2}\psi(z)\quad z\in\partial D, \label{eq:double-pm-0}\\
-   \partial_\nu\mathcal{D}^+(z) &= \partial_\nu\mathcal{D}^-(z) \quad z\in\partial D. \label{eq:double-pm-1}
-  \end{align}
-  \end{subequations}
- \end{enumerate}
-\end{theorem}
+If we consider the Laplace problem \eqref{eq:laplace-in}, it's convenient to represent the 
+solution in different ways, according with the nature of boundary conditions
+\begin{align}
+  u = g, & \textup{ on }\partial\Omega \quad \Rightarrow \quad u = \mathcal{D}(\partial\Omega;\, \psi), \label{eq:bc-lap-dir}\\
+  \partial_\nu u = g, & \textup{ on }\partial\Omega \quad \Rightarrow \quad u = \mathcal{S}(\partial\Omega;\, \psi), \label{eq:bc-lap-neum}
+\end{align}
+which respectively yield to equations
+\begin{align}
+ (K - 0.5 I)\psi &= g,\label{eq:bie-dir}\\
+ (K' + 0.5 I)\psi &= g.\label{eq:bie-neum}
+\end{align}
+
+Both the equations \eqref{eq:bie-dir} and \eqref{eq:bie-neum} are in the form of an \emph{integral equation 
+of the second kind} $I - \tilde{K}:X\to Y$, where $\tilde{K}$ is a linear compact operator, between Banach spaces.
+This entails well position of the linear equation and the existence of a bounded inverse operator.
+According with the Boundary Element Method, we consider the discretization
+of $A\psi=f$ in $Y$, and we solve it for $u$ belonging to the finite dimensional 
+subspace $X_n\subset X$.
+\par
+We denote by $\{\psi_j\}_{i=0}^m$ the finite basis of $X_n$.
+Therefore the integral equations \eqref{eq:bie-dir} and \eqref{eq:bie-neum} are reduced to
+\begin{equation}
+ \sum_{j=0}^m(A\psi_j) \alpha_j = f \upon \partial\Omega,\label{eq:directlinear}
+\end{equation}
+where, in the considered interior problem with Dirichlet data, the full expression of $A\psi_j$ is
+\begin{equation}
+ A\psi_j(z_0) = \int_{\partial\Omega}\partial_{\nu(z)}\Phi(z_0, z)\psi_j(z)\,dz  - \frac{1}{2}\psi_j(z_0).
+\end{equation}
+There exist several methods to solve the equation \eqref{eq:directlinear}, with $\psi\in X_n$, 
+for a linear operator $A:X\to Y$. They 
+can be classified under the name of \emph{projection methods} (see \cite{kirsch:book}), since
+they project the equation on a finite dimensional subspace $Y_n\subset Y$.
+The most common methods are the \emph{Galerkin method}, which considers the orthogonal projection,
+and the \emph{least squares method}. For equations which derive from boundary integrals, 
+the most popular choice is the \emph{collocation method}, which has the advantage of 
+performing only one integration, in contrast with the other ones.
+\par
+We denote by $z_i = c(\tau_i)$ the collocation nodes, which we will take corresponding to 
+mesh vertices. Then we impose the boundary data in correspondence of these nodes, that is
+\begin{equation}
+ \sum_{j=0}^m(A\psi_j)(z_i) \alpha_j = f(z_i), \quad \textup{ or }\quad \sum_{j=0}^mA_{ij}\alpha_j = \beta_i, 
+ \quad i=0,\dots,m.\label{eq:bie-collocated}
+\end{equation}
+We are left to choose a quadrature rule which doesn't affect the order of convergence, 
+in the computation of the matrix's element
+\begin{equation}
+\label{eq:Aij}
+ A_{ij} = \int_{\partial\Omega}\partial_{\nu(z)}\Phi_{z}(z_i) \psi_j(z)\,dz - \frac{1}{2} \psi_j(z_i).
+\end{equation}
+For a boundary $\partial\Omega$ of class $C^2$, the integral kernel $\partial_{\nu(z)}\Phi_{z}(z_i)$ is 
+continuous (there exists a finite limit for $z\to z_i$), but in general the integral 
+kernel $K(z_i,z)$ has a singularity.
+\par 
+In the sequel, we will consider the fundamental solutions
+of the Laplace equation and the Helmholtz equation. Since both of them have a logarithmic 
+singularity, the most efficient method to approximate the improper integral 
+is to not change the quadrature nodes (we usually consider the equidistant nodes, 
+without recomputing them, for all the collocation points)
+and to rewrite the kernel as the sum of two parts. 
+We fix the notation denoting by $M(z_0,z)$ the integral kernel of the single 
+layer operator $S$, and by $L(z_0, z)$ the kernel of the double layer operator $K'$, 
+with $z=c(\tau)$, $z_0=c(t)$, both belonging to $\partial\Omega$
+\begin{align}
+ L(t,\tau)
+ \coloneqq
+%  &\frac{1}{2\pi}\frac{1}{|c(t)-c(\tau)|}\frac{c(t)- c(\tau)}{|c(t)-c(\tau)|}
+%  \cdot \nu(c(\tau))|c'(\tau)|\\
+%  =
+ &L_1(t,\tau)\ln\Big(4\sin^2\frac{t-\tau}{2}\Big)+L_2(t,\tau),
+ \label{eq:def-kernel-L}\\
+ M(t,\tau)
+ \coloneqq
+ &M_1(t,\tau)\ln\Big(4\sin^2\frac{t-\tau}{2}\Big)+M_2(t,\tau),
+ \label{eq:def-kernel-M}
+\end{align}
+% \begin{equation}
+% \label{eq:def-kernel-M}
+%  M(t,\tau)\coloneqq-\frac{1}{2\pi}\ln|c(t)-c(\tau)|=M_1(t,\tau)\ln\Big(4\sin^2\frac{t-\tau}{2}\Big)+M_2(t,\tau),
+% \end{equation}
+where all $L_1(t,\tau)$, $L_2(t,\tau)$, $M_1(t,\tau)$, $M_2(t,\tau)$ turn out
+to be continuous and bounded (actually they are all analytic).
+It's possible to compute the integral of the logarithmic singularity
+through the trigonometric interpolation of the integrand function.
+Indeed there hold the following orthogonality relations
+(see Lemma 8.21 contained in \cite{kress:book}),
+\begin{equation}
+ \frac{1}{2\pi}\int_0^{2\pi}\ln\Bigl(4\sin^2\frac{t}{2}\Bigr)e^{imt}\,dt=
+ \begin{cases}
+  0, & m=0, \\
+  -1/|m|, & m=\pm1,\pm2,\dots
+ \end{cases}
+\end{equation}
+This result let us to compute the exact weights 
+\begin{equation}
+ R_j^{(n)}(t)=\frac{1}{2\pi}\int_0^{2\pi}\ln\Bigl(4\sin^2\frac{t-\tau}{2}\Bigr)L_j(\tau)d\tau, \quad j=0,\dots,2n-1,
+\end{equation}
+from the integral of $L_j(t)$, denoting the function of the trigonometric lagrangian basis.
+
+% \begin{equation}
+%  R_j^{(n)}(t)=-\frac{1}{n}\Bigl\{\sum_{m=1}^{n-1}\frac{1}{m}\cos m(t-\tau_j) + \frac{1}{2n}\cos n(t-\tau_j)\Bigr\}, \quad j=0,\dots,2n-1.
+% \end{equation}
+
+\section{The Boundary Element Method}
+\label{section:bem}
+In this section we will present the discretization method called Boundary
+Element Method, whose details are for example contained in 
+\cite{brebbia:book}, \cite{brebbia:book-progress}, applied
+in particular to elasticity problems and to mechanics.
+\par
+Let $\partial\Omega$ be a curve 
+in $\mathbb{R}^2$ of class $C^2$ parametrized by
+\begin{equation}
+c(t):[0,2\pi]\to\mathbb{R}^2,
+\end{equation}
+and let $\mathcal{P}_n = \{[\tau_k^{(n)},\tau_{k+1}^{(n)}]\}_{k=0}^{2n-1}$
+be a partition of 
+the interval $[0, 2\pi]$, with equidistant nodes $\tau_k^{(n)}=k\pi/n$, 
+which defines a partition $\mathcal{E}_n = \{E_k\}_{k=0}^{2n-1}$ of the boundary 
+$\partial \Omega=\bigcup E_k$, with $E_k \coloneqq c([\tau_k, \tau_{k+1}])$.
+\begin{center}
+\begin{tikzpicture}
+\draw [thick] (-2, -1) 
+  .. controls ++(80:1) and ++(20:-0.8) .. (0, 1.5)
+  .. controls ++(20:0.8) and ++(120:1) .. (3, 0);
+\node at (-2,-1.2){$c(\tau_{k+2})$};
+\node at (-0.6,1.7){$c(\tau_{k+1})$};
+\node at (3.45,0){$c(\tau_{k})$};
+\node at (1.5,0.5){$e_k$};
+\node at (1.5,1.6){$E_k$};
+\node at (-0.6,-0.1){$e_{k+1}$};
+\node at (-1.9,0.5){$E_{k+1}$};
+\node at (3.0,1.5)(boundary){$\partial \Omega$};
+
+\draw [fill] (-2,-1) circle [radius=1pt];
+\draw [fill] (0,1.5) circle [radius=1pt];
+\draw [fill] (3,0) circle [radius=1pt];
+\draw [] (-2,-1)--(0, 1.5);
+\draw [] (3,0)--(0, 1.5);
+\end{tikzpicture}
+\hspace*{-1cm}
+\begin{tikzpicture}
+\draw [] (-1,0)--(1, 0);
+\draw [fill] (-1,0) circle [radius=1pt];
+\draw [fill] (0,0) circle [radius=1pt];
+\draw [fill] (1,0) circle [radius=1pt];
+\node at (-1,-0.2){$\tau_{k}$};
+\node at (0,-0.2){$\tau_{k+1}$};
+\node at (1,-0.2){$\tau_{k+2}$};
+
+\node (x2) at (-4,2.5){$ $};
+\node (x1) at (0,0.5){$ $};
+
+\draw[->] (x1) to [out=90,in=0] node[above,midway]{$c$}(x2);
+\end{tikzpicture}
+\end{center}
+Now we introduce the finite element spaces, at the same way they 
+are defined for a two or three dimensional mesh $\mathcal{T}_h$,
+in other methods, like FEM
+(see \cite{Quarteroni:book}).
+Let $\partial\Omega_h \coloneqq \bigcup e_k\approx\partial\Omega$, 
+with $e_k = [c(\tau_k), c(\tau_{k+1})]$, be the approximate boundary,
+then
+we consider the finite element space of continuous, piecewise polynomial functions of degree $r$,
+constructed on the discretized boundary $\partial\Omega_h$, that is
+\begin{equation}
+ X^r_h \coloneqq \{v_h\in C^0(\partial\Omega_h):v_h|_{e_k} \in \mathbb{P}^r,\, \forall e_k\in \partial\Omega_h\}.
+\end{equation}
+We can associate to $X^r_h$ a collection of nodes, denoted in general by $z_i$ and 
+coincident with collocation nodes used for the boundary integral equation \eqref{eq:bie-collocated}, 
+such that we can define a \emph{lagrangian basis} for $X^r_h$,
+denoted by $\{\psi_j\}_{i=0}^m$.
+\par
+An alternative finite dimensional space for regular domains, 
+when it's given the explicit parametrization of $\partial \Omega$,
+is the space of finite element functions $v(c(t))$ on $[0,2\pi]$.
+We denote by $X_n$ the space constructed as before
+for a given partition $\mathcal{P}_n$ of $[0, 2\pi]$, that is
+\begin{equation}
+ X^r_n \coloneqq \{v_n\in C^0(\partial\Omega):v_n(c(t))|_{I_K} \in \mathbb{P}^r,\, \forall I_K\in \mathcal{P}_n\}.
+\end{equation}
+\par
+In some applications it's admissible the choice of piecewise constant boundary
+element functions, denoted by $X^0_h$. Consequently the domain of the integral $A_{ij}$,
+with kernel $a$, coincides with the segment $e_j$
+\begin{equation}
+\label{eq:Aij-X0h}
+ A_{ij} = \int_{e_j}a(z_i,z)\,dz.
+\end{equation}
+For BIE of the second kind, like \eqref{eq:bie-dir}, \eqref{eq:bie-neum},
+we can not implement the $X^0_h$ discretization, otherwise the discrete function $\psi(z)$
+would be discontinuous in the collocation nodes.
+\par
+% According with the space of element functions, we choose the best 
+% quadrature rule to integrate $A_{ij}$ \eqref{eq:Aij}.
+% In many cases, to obtain an high order for the convergence, 
+% from the knowledge of fundamental solution, \eqref{eq:Aij-X0h} is
+% integrated exactly.
+A good compromise is to choose a quadrature rule with one or two points per
+segment. Indeed a further refinement of the quadrature mesh would make the method less
+competitive with respect to the same method with more nodes.
+
+We report the quadrature points and quadrature weights for the integration 
+along a one dimensional discrete curve, which are
+described in \cite{FreeFem-doc}, documentation of the software
+FreeFem++ \cite{FreeFem}, and are implemented in the finite element spaces
+denoted by P0, P1, P2.
+% 9.6884482205476277804
+% wh
+% 9.682030647015111
+% \begin{table}
+% \caption{.}
+% \label{tab:ellipse-parameters}
+\begin{center}
+% \vspace*{-0.5cm}
+\begin{tabular}{lccc}
+\toprule
+ qfe & point in $[z_i, z_{i+1}](=t)$ & 
+ $\omega$ & $r$(exact on $\mathbb{P}^r$)\\
+\midrule
+qf1pE & $1/2$ &  $|z_iz_{i+1}|$ & 1\\
+qf2pE & $(1\pm\sqrt{1/3})/2$ &  $|z_iz_{i+1}|/2$ & 3\\
+qf1pElump & $\{0, 1\}$ & $|z_iz_{i+1}|/2$ & 1\\
+\bottomrule
+\end{tabular}
+\end{center}
+% \end{table}
+Therefore the choice of ``qf1pElump'' for $X^1_h$ yields to (by $\psi_j(z_k) = \delta_{jk}$)
+% ``‘qf1pElump'''
+\begin{equation}
+\label{eq:Aij-X1h}
+ A_{ij} = \frac{1}{2}\big(|z_jz_{j-1}| + |z_jz_{j+1}|\big)\partial_{z}\Phi(z_i,z_j)\cdot \nu(z_j) - \frac{1}{2} \delta_{ij}.
+\end{equation}
+The quadrature nodes can be better observed in Figure \ref{fig:qf2}.
+We remark that for ``qf1pE'', ``qf2pE'', the singularity it's never evaluated. Instead for ``qf1pElump''
+the collocation nodes and the quadrature nodes coincide, and the singularity can appear.
+In the above equation \eqref{eq:Aij-X1h} the kernel of $K$ has a finite limit for smooth boundaries (see next section),
+but we cannot expect the same for the fundamental function of the Helmholtz equation.
+\par
+If we choose to integrate on the exact boundary $\partial\Omega$,
+we can consider the space $X^1_n$, equivalent to $X^1_h$, with the
+the weights $\omega$ substituted by the speed $|c'(\tau)|$.
+Furthermore, decompositions \eqref{eq:def-kernel-L} and \eqref{eq:def-kernel-M} let us to integrate even singular kernels.
+% \begin{equation}
+% \label{eq:Aij-X1n}
+%  A_{ij} = \int_{\partial\Omega}\partial_{\nu(z)}\Phi_{z}(z_i) \psi_j(z)\,dz
+% \end{equation}
+The choice of $X^1_n$ is particular competitive for smooth domains, 
+that can be easily parametrized.
+% Therefore separating the singularity, we can approximate \eqref{eq:Aij-X1n} 
+% without refining the quadrature nodes
+
+\section{BEM vs FEM}
+\label{section:bemfem}
+% We are advantaged by the reduced amount of computation, since Nystr\"{o}m method requires only 
+% one integration, while two integrations are needed for the Galerkin method, and three 
+% integrations for the Least Squares method.
+We list main advantages of the formulation of the problem through boundary integrals, 
+instead of using for instance the discretization of the variational formulation with the FEM.
+\begin{enumerate}
+ \item The expression of the solution reduces to a boundary integral,
+ and allows not to consider the full domain. The discretization of a curve, instead of an area 
+ in two dimension (or a surface instead of a volume in three dimension), is less expensive.
+ \item We can deal with unbounded regions in exterior problems, as easily as we do with bounded regions.
+ \item Most of the times, for smooth boundaries and smooth data, the rate of convergence is very high, even exponential.
+\end{enumerate}
+On the other end, we present the main disadvantages.
+\begin{enumerate}
+ \item The boundary integrals formulation requires the knowledge of the fundamental solution. 
+ This fact depends on the nature of the differential equation 
+ and prevent us from solving 
+ differential problem with non constant parameters.
+ \item Main difficulties comes from singularities of the integral kernels, 
+ which requires a convergent quadrature method.
+ \item Some attention must be payed to boundaries with corners, 
+ where the unknown densities are singular. The quadrature rule requires a more 
+ careful collocation of the nodes.
+\end{enumerate}
+
+\section{Numerical examples}
+\label{section:num}
+In this section we consider mainly the numerical discretization of interior and 
+exterior BVPs for the Laplace equation and the Helmholtz equation.
+We can implement the same algorithm for both of them, since the jump relations 
+in Theorem \ref{theo:jump-relations}
+remain unchanged for both equations. Furthermore, their fundamental solutions have
+the same kind of singularity, and the only modification is the explicit computation of
+the limit values $M_2(t,t)$ and $L_2(t,t)$.
+Most of the exact expressions that we will use in the sequel, can be found in 
+\cite{colton-kress:book}, and we imported their implementation in the Python package
+from the MATLAB toolbox MPSpack \cite{mpspack}. We will present all the examples in two dimension, 
+since we can implement them much more easier, even if the theory of boundary integrals 
+is true for problems in a three dimensional framework.
+\par
+We consider the Laplace equation $-\Delta u = 0$ in a open domain $\Omega$ of class $C^2$. 
+We start from the knowledge of its fundamental solution \eqref{eq:definition-Phi-23} and
+the fact that the integral kernel $L(t,\tau)$ of the double layer operator $K'$ is continuous
+for regular domains (the same holds for $K$), with limit value for $\tau \to t$ equal to
+\begin{align}
+ &\lim_{\tau \to t}L(\tau,t)=\lim_{\tau \to t}\frac{1}{2\pi}\frac{c(t)-c(\tau)}{|c(t) - c(\tau)|^2}\cdot\nu(c(\tau))|c'(\tau)|
+%  \\
+%  =&\lim_{\tau \to t}\frac{1}{2\pi}\frac{-\frac{1}{2}c''(\xi)|t-\tau|^2\cdot\nu(c(\tau))|c'(\tau)|}{|c'(\zeta)|^2|t-\tau|^2}
+%  = -\frac{1}{4\pi}\frac{c''(t)\cdot\nu(t)}{|c'(t)|} 
+ = -\frac{1}{4\pi}\kappa(t)|c'(t)|,
+\end{align}
+On the other end, the integral kernel $M(t,\tau)$ of the single layer operator 
+is computed as the sum of two terms
+\begin{equation}
+\begin{cases}
+ M_1(t,\tau)= -1/(4\pi), \\
+ M_2(t,\tau)=M(t,\tau) - M_1(t,\tau)\ln\Big(4\sin^2\dfrac{t-\tau}{2}\Big), & t\neq \tau,
+\end{cases}
+\end{equation}
+with a diagonal term computed from the asymptotic expansion
+\begin{align}
+ M_2(\tau,\tau)&=\lim_{t\to\tau} \Big(M(t,\tau) - M_1(t,\tau)\ln\Big(4\sin^2\frac{t-\tau}{2}\Big)\Big)
+%  \\
+%  &=2M_1(\tau,\tau)\ln\big(|c'(\tau)|\big)
+ =-\frac{1}{2\pi}\ln|c'(\tau)|.
+\end{align}
+Therefore, in our first implementation, we will use the computation of the
+speed $|c'(\tau)|$ and the curvature $\kappa(\tau)$ from the explicit expression
+of $c(t)$, $c'(t)$ and $c''(t)$, which will be the parametrization of a circle, or an ellipse.
+As already observed in section \ref{section:bie}, we will adopt the most convenient representation according 
+with boundary conditions, that will be \eqref{eq:bc-lap-dir} and \eqref{eq:bc-lap-neum} for interior problems. 
+\par
+We start from the implementation of the space $X^1_n$, and
+we choose to approximate the integral in \eqref{eq:Aij} by the trapezoidal quadrature rule, 
+taking quadrature nodes coincident with collocation nodes.
+We obtained the numerical approximations in Figure \ref{fig:cf_lap_neum_circle}, with the
+imposed boundary data $g$ for the Neumann interior problem 
+computed from the harmonic function $\tfrac{1}{6}(x^3 - 3xy^2)$.
+\par
+
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+{
+\includegraphics[width=.42\textwidth]{fig/cf_lap_neum_int_circle_exact}
+}
+{
+\includegraphics[width=.42\textwidth]{fig/cf_lap_neum_int_circle}
+}
+\\
+{
+\includegraphics[width=.42\textwidth]{fig/cf_lap_neum_ext_circle_exact}
+}
+{
+\includegraphics[width=.42\textwidth]{fig/cf_lap_neum_ext_circle}
+}
+% \subfloat[][\emph{Factorization method}.]
+% {
+% \includegraphics[width=.48\textwidth]{fig/one_ellipse_fm_ellipse0}
+% }
+\caption{\emph{Images of the exact solution $g$ on the left, and the approximation $u$ computed on the right,
+for the interior and the exterior Laplace problem with Neumann conditions}.}
+\label{fig:cf_lap_neum_circle}
+\end{figure}
+\end{center}
+
+An analysis of the convergence of the collocation method can be found in 
+\cite{chen-zhou:book} or in \cite{kress:book}.
+In both cases a fundamental role is played by the convergence results of quadrature rules employed.
+In Figures \ref{fig:convergence_lap_neum_circle}, \ref{fig:convergence_lap_neum_ellipse} and \ref{fig:convergence_lap_dir_ellipse} 
+we reported the estimated order of convergence of the $L^2(\partial\Omega)$ norm of the
+error of the trace of the solution. As can be observed, the numerical approximation 
+converges with $n$ to the second power to the solution, according with the trapezoidal rule
+\begin{equation}
+ \|u_n - u\|_{L^2(\partial\Omega)}\leq Cn^{-2}.
+\end{equation}
+
+\par
+The implementation of the boundary element method for the exterior BVPs
+requires only 
+a small change in the sign of the jumps in the integrals equations 
+\eqref{eq:bie-dir} and \eqref{eq:bie-neum}, 
+that is
+\begin{align}
+ (K + 0.5 I)\psi &= g,\label{eq:bie-dir-ext}\\
+ (K' - 0.5 I)\psi &= g.\label{eq:bie-neum-ext}
+\end{align}
+In Figures \ref{fig:convergence_lap_neum_circle}, \ref{fig:convergence_lap_neum_ellipse} and \ref{fig:convergence_lap_dir_ellipse} we reported the same analysis of convergence which we have done 
+previously, with the
+imposed boundary data $g$ computed from $  g= - 1/6(x^3 - 3xy^2)/(
+(x^3 - 3xy^2)^2 + (3x^2y - y^3)^2)$.
+
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+{
+\includegraphics[width=.40\textwidth]{fig/convergence_lap_neum_int_circle}
+}
+{
+\includegraphics[width=.40\textwidth]{fig/convergence_lap_neum_ext_circle}
+}% \subfloat[][\emph{Factorization method}.]
+\caption{\emph{Loglog plot of the $L^2(\partial\Omega)$ error for the interior and the exterior 
+Laplace problem in a circle with Neumann conditions, respectively. The estimated exponents in the power of $n$ of the error 
+are both equal to $-1.9995$.}}
+\label{fig:convergence_lap_neum_circle}
+\end{figure}
+\end{center}
+
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+{
+\includegraphics[width=.40\textwidth]{fig/convergence_lap_neum_int_ellipse}
+}
+{
+\includegraphics[width=.40\textwidth]{fig/convergence_lap_neum_ext_ellipse}
+}% \subfloat[][\emph{Factorization method}.]
+\caption{\emph{Loglog plot of the $L^2(\partial\Omega)$ error for the interior and the exterior 
+Laplace problem in a ellipse with Neumann conditions, respectively. The estimated exponents in the power of $n$ of the error 
+are equal to $-1.9996$ and $-1.9933$.}}
+\label{fig:convergence_lap_neum_ellipse}
+\end{figure}
+\end{center}
 
 
-The formula \eqref{eq:representation-formula-harmonics} can be extended to $z_0 \in 
-\mathbb{R}^m\backslash\partial\Omega$ and 
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+{
+\includegraphics[width=.40\textwidth]{fig/convergence_lap_dir_int_ellipse}
+}
+{
+\includegraphics[width=.40\textwidth]{fig/convergence_lap_dir_ext_ellipse}
+}% \subfloat[][\emph{Factorization method}.]
+\caption{\emph{Loglog plot of the $L^2(\partial\Omega)$ error for the interior and the exterior 
+Laplace problem in an ellipse with Dirichlet conditions, respectively. The estimated exponents in the power of $n$ of the error 
+are equal to $-1.9996$ and $-1.9933$.}}
+\label{fig:convergence_lap_dir_ellipse}
+\end{figure}
+\end{center}
 
-The rigorous derivation of the 
-representation formulas 
+\par
+The other approach is to implement a finite element basis defined on $\partial\Omega_h$ like $X^2_h$,
+whose nodes are well described in the explicative Figure \ref{fig:qf2}.
+In some aspects the implementation is more difficult, because we have to approximate
+some exact quantities, like the curvature, for the collocation midpoints, defined on $\partial\Omega_h$, 
+but not on $\partial\Omega$.
+In Figure \ref{fig:ploterrorqf2} we can observe the plot of the error computed
+with the $L^\infty(\Omega)$ norm, which decrease according with the power law.
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+\centering
+{
+\includegraphics[width=.40\textwidth]{fig/geometry_qf2}
+}
+\caption{\emph{Discretized boundary $\partial\Omega_h$, with red '*' as collocation nodes of $X^2_h$, 
+corresponding to vertices and midpoints of the segments, and with blue 'o' as quadrature nodes, as in the 
+previous table}.}
+\label{fig:qf2}
+\end{figure}
+\end{center}
 
-% \include{notes/chapter-direct.tex}
 
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+{
+\includegraphics[width=.34\textwidth]{fig/ploterrorqf210}
+}
+{
+\includegraphics[width=.30\textwidth]{fig/ploterrorqf250}
+}
+{
+\includegraphics[width=.30\textwidth]{fig/ploterrorqf250_zoom}
+}
+% \subfloat[][\emph{Factorization method}.]
+% {
+% \includegraphics[width=.48\textwidth]{fig/one_ellipse_fm_ellipse0}
+% }
+\caption{\emph{Error difference $u_h - u$ computed with the space $X^2_h$, 
+using $n=10$ in the first image, and $n=50$ in the second, as can be observed with by the colorbars, 
+for an elliptic domain $\Omega$. The third image is the zoomed picture of the second to 
+evidence that in BEM the error is greater on the integration boundary.}}
+\label{fig:ploterrorqf2}
+\end{figure}
+\end{center}
+In \cite{kress:book} are presented some estimates for the trapezoidal rule
+applied to an analytic integrand $\psi(z)$, which yield to an exponential convergence of the error
+\begin{equation}
+ \|Q_n\psi - \psi\|_{L^\infty(\partial\Omega)} \leq Ce^{-\sigma n},
+\end{equation}
+with respect to the number $n$ of quadrature nodes, strictly connected to the size of the discrete
+functional space $X_n$. This behavior is effectively observed in the numerical results.
+This behavior can be observed in Figure \ref{fig:errorinfinty}. This method results much more
+efficient with respect to $X^2_h$, because of the use of much more exact expressions. Furthermore
+it's a combination of collocation with quadrature as proved in \cite{kress:book}.
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+% {
+% \includegraphics[width=.25\textwidth]{fig/geometry_qf2}
+% }
+ \subfloat[][ ]
+{
+\includegraphics[width=.45\textwidth]{fig/convergence_dir_int_ellipse_qf2_infinity_power}
+}
+ \subfloat[][ ]
+{
+\includegraphics[width=.45\textwidth]{fig/convergence_dir_int_ellipse_exponential}
+}
+% \subfloat[][\emph{Factorization method}.]
+% {
+% \includegraphics[width=.48\textwidth]{fig/one_ellipse_fm_ellipse0}
+% }
+\caption{\emph{Logarithmic plots of the $L^\infty(\Omega)$ error. In Figure (a) the error 
+computed for $X^2_h$ is logarithmic in both the axes, according with a power law;
+in Figure (b) the error 
+computed for $X^1_n$ is logarithmic in the $y$ axis, according with an exponential law.}}
+\label{fig:errorinfinty}
+\end{figure}
+\end{center}
+
+\par
+The second problem that we consider it's the Helmholtz equation 
+in an open set $\Omega$ of class $C^2$
+\begin{eqnarray}
+ -\Delta u - k^2 u= 0, & \textup{ in }\Omega.\label{eq:helmholtz-in}
+%  u = g, & \textup{ on }\partial\Omega.\label{eq:helmholtz-on}
+\end{eqnarray}
+We can end up with it every time we want to compute the time harmonic eigenmodes
+$w(x,t)=e^{-i\omega t}u(x)$, with amplitude $u$, of an elastic membrane
+which satisfies the wave equation $w_{tt} - c^2 \Delta w=0$. In an homogeneous medium
+we can substitute the square of wave number $k^2$ in equation \eqref{eq:helmholtz-in}
+with $n k^2$, where $n=c_0^2/c^2$ is the refraction index and $c_0$ is the speed of sound.
+\par
+The fundamental solution of the Helmholtz equation in $\mathcal{D}'(\mathbb{R}^m)$ is
+\begin{equation}
+\label{eq:definition-Phi-23-helm}
+  \Phi(z,z_0;k)=
+  \left\{
+  \begin{aligned}
+   &\dfrac{i}{4}H_0^{(1)}(k| z - z_0|), && m=2, \\
+   &\dfrac{e^{ik| z - z_0|}}{4\pi| z  - z_0|}, && m=3.
+  \end{aligned}
+  \right.
+\end{equation}
+where $H_\alpha^{(1)}(z)=J_\alpha(z)+iI_\alpha(z)$ is the Hankel function of the first kind,
+and $J_\alpha(z)$, $I_\alpha(z)$, are respectively the Bessel and the Neumann function
+of order $\alpha$.
+The algorithm is the same of before, with the difference that both integral kernels 
+$L(t,\tau)$ and $M(t,\tau)$ are singular, and 
+analytic computations are much more difficult. These can be found in \cite{colton-kress:book}
+and have been used in the numerical implementation, that are
+\begin{align}
+ L_1(t,\tau)\coloneqq&\frac{k}{2\pi}(c_2'(\tau), -c_1'(\tau))\cdot (c(t) - c(\tau)) \frac{J_1(kr(t,\tau))}{r(t,\tau)}, \\
+ M_1(t,\tau)\coloneqq&-\frac{1}{2\pi}J_0(kr(t,\tau))|c'(\tau)|,
+\end{align}
+with diagonal terms
+\begin{align}
+ L_2(t,t)=&-\frac{1}{4\pi}\kappa(t)|c'(t)|, \\
+ M_2(t,t)=&\Big\{\frac{i}{2}-\frac{C}{\pi}
+ -\frac{1}{2\pi}\ln\Big(\frac{k^2}{4}|c'(t)|^2\Big)\Big\}
+ |c'(t)|,
+\end{align}
+with $C$ denoting Euler's constant.
+
+\par
+An other class of problems which we can consider is the scattering problem in $\mathbb{R}^2$.
+Let $\Omega$ be an open domain of class $C^2$, we denote by $u_I$ the incident field, 
+for example a plane wave $u_I = e^{-ik(\eta_1 x + \eta_2 y)}$ and by $u_S$ the scattered field, such that the
+total field
+\begin{equation}
+ u=u_I + u_S\label{eq:def-total-fiels} 
+\end{equation}
+satisfies the Helmholtz equation in 
+$\mathbb{R}^2\backslash\overline{\Omega}$, with Sommerfeld radiation 
+conditions in $\mathbb{R}^2$ at infinity
+\begin{align}
+ \Delta u + k^2 u &= 0 \quad \upin \mathbb{R}^2\backslash\overline{\Omega},\\
+ u(x)&=O(|x|^{-1}) \quad |x|\to \infty,\\
+ \partial_r u - ik u &=o(|x|^{-1})\quad |x|\to \infty,   
+\end{align}
+and boundary conditions
+\begin{enumerate}
+ \item homogeneous Dirichlet boundary conditions for a \emph{sound-soft obstacle}
+ \begin{equation}
+  u = u_I + u_S= 0\quad\upon \partial \Omega,
+ \end{equation}
+ \item homogeneous Neumann boundary conditions for a \emph{sound-hard obstacle}
+ \begin{equation}
+  \partial_\nu u = \partial_\nu u_I + \partial_\nu u_S= 0\quad\upon \partial \Omega.
+ \end{equation}
+\end{enumerate}
+The most convenient representation for the scattered field suggested in \cite{chen-zhou:book} is
+\begin{equation}
+ u_S(z_0)=\int_{\partial \Omega}\Big\{\partial_{\nu(z)}\Phi_z(z_0;k) -i\Phi_z(z_0;k)\Big\}\psi(z)\,dz.
+\end{equation}
+In Figures \ref{fig:scatt_soft_ellipse_10}, \ref{fig:scatt_soft_ellipse_10_imag}, \ref{fig:scatt_soft_ellipse_3}, 
+we can see the approximation computed for the scattering problem with sound-soft boundary conditions 
+on $\partial\Omega$.
+
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+{
+\includegraphics[width=.30\textwidth]{fig/scatt_soft_inc_ellipse_10}
+}
+{
+\includegraphics[width=.30\textwidth]{fig/scatt_soft_scatt_ellipse_10}
+}
+{
+\includegraphics[width=.30\textwidth]{fig/scatt_soft_tot_ellipse_10}
+}
+% \subfloat[][\emph{Factorization method}.]
+% {
+% \includegraphics[width=.48\textwidth]{fig/one_ellipse_fm_ellipse0}
+% }
+\caption{\emph{Scattering problem, with homogeneous sound-soft conditions $u=0$. Images of the 
+real part
+of the incident field $u_I$ (a plane wave with $\eta=(\cos\alpha,\, \sin\alpha)$ for $\alpha=\pi/4$), the scattered field 
+$u_S$, and the total field $u=u_I + u_S$, respectively, for $k=10$}.}
+\label{fig:scatt_soft_ellipse_10}
+\end{figure}
+\end{center}
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+{
+\includegraphics[width=.30\textwidth]{fig/scatt_soft_inc_ellipse_10_imag}
+}
+{
+\includegraphics[width=.30\textwidth]{fig/scatt_soft_scatt_ellipse_10_imag}
+}
+{
+\includegraphics[width=.30\textwidth]{fig/scatt_soft_tot_ellipse_10_imag}
+}
+% \subfloat[][\emph{Factorization method}.]
+% {
+% \includegraphics[width=.48\textwidth]{fig/one_ellipse_fm_ellipse0}
+% }
+\caption{\emph{Images of the imaginary part of the fields in 
+Figure \ref{fig:scatt_soft_ellipse_10}}.}
+\label{fig:scatt_soft_ellipse_10_imag}
+\end{figure}
+\end{center}
+
+\begin{center}
+\begin{figure}
+% \subfloat[][\emph{Linear sampling method for $\alpha=\mathrm{1e}{-10}$}.]
+{
+\includegraphics[width=.30\textwidth]{fig/scatt_soft_inc_ellipse_3}
+}
+{
+\includegraphics[width=.30\textwidth]{fig/scatt_soft_scatt_ellipse_3}
+}
+{
+\includegraphics[width=.30\textwidth]{fig/scatt_soft_tot_ellipse_3}
+}
+% \subfloat[][\emph{Factorization method}.]
+% {
+% \includegraphics[width=.48\textwidth]{fig/one_ellipse_fm_ellipse0}
+% }
+\caption{\emph{Images of the real part of the fields $u_I$, $u_S$, $u$, of the same scattering 
+problem of Figure \ref{fig:scatt_soft_ellipse_10}, for $k=3$}.}
+\label{fig:scatt_soft_ellipse_3}
+\end{figure}
+\end{center}
+\clearpage
+
+\section{Conclusion}
+As the final section of this work, we can say that the BEM is very competitive
+in a few problems. This set is very restricted to equations with homogeneous coefficients.
+Furthermore, the method requires the knowledge of some analytical tools, such
+representations formulas and fundamental solutions.
+\par
+An efficient implementation requires the explicit parametrization of the domain, and 
+the exact computation of the speed and the curvature of the curve, and of singularities
+often contained in integral kernels (at least for equations constructed from BVPs).
+This appears clearer for the computation of the volume potential
+\begin{equation}
+ v(z_0)\coloneqq-\int_\Omega\Phi(z_0, z)f(z)\,dz\quad z_0 \in \overline{\Omega},
+\end{equation}
+to solve the non homogeneous Laplace equation $\Delta u = f$. The exact integration
+of the singularity, with the help of an explicit expression, can avoid to 
+define an adaptive quadrature mesh, near the singularity, for any point $z_0$.
+This would make the method impracticable.
+\par
+The advantage is the fast exponential convergence in $L^\infty$ which gives very good results
+for a very small number of nodes, for very simple equations.
+\clearpage
+
+% \appendix
+% \section{Potential Theory}
+% \backmatter
 %\nocite{*}
 \printbibliography % biber
 % \bibliographystyle{plain} % bibtex
@@ -397,3 +1174,29 @@ See the second case \ref{negative} or the first \ref{positive}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \centering
 \includegraphics[width=\textwidth]{fig/prova}
+[-1.91529691 -1.97335725 -1.98705091 -1.99249668 -1.99415003 -1.99627237
+ -2.00320322 -1.99105893 -2.01682065 -1.97808453 -1.9993953  -1.998383
+ -1.99918649 -2.000984   -2.00986185 -1.9862331  -1.99954409 -1.99949211]
+[-1.91529691 -1.97335725 -1.98705091 -1.99249668 -1.99415003 -1.99627237
+ -2.00320322 -1.99105893 -2.01682065 -1.97808453 -1.9993953  -1.998383
+ -1.99918649 -2.000984   -2.00986185 -1.9862331  -1.99954409 -1.99949211]
+out/mesh_one_ellipse_2_1_50
+[-1.92146356 -1.97336453 -1.98705427 -1.99249722 -1.9941497  -1.99627168
+ -2.00320611 -1.99105791 -2.01682316 -1.97808103 -1.99939492 -1.99774228
+ -1.99987823 -2.00098443 -2.00986266 -1.98619739 -1.9995809  -1.99948914]
+[-1.03384921 -2.80675339 -1.65444285 -1.95018959 -1.95664611 -1.96981612
+ -1.97923311 -1.97500048 -2.00380637 -1.96838774 -1.98940744 -1.98695238
+ -1.99444467 -1.99887955 -2.00498359 -1.98170047 -1.99333241 -1.73884316]
+out/mesh_one_ellipse_2_1_50
+[-1.92328738 -1.97336476 -1.98705427 -1.99249722 -1.9941497  -1.99627168
+ -2.00320611 -1.99105791 -2.01682316 -1.97808103 -1.99939492 -1.99774228
+ -1.99987823 -2.00098443 -2.00986266 -1.98619739 -1.9995809  -1.99948914]
+[-0.28484034 -2.50033809 -1.72562427 -1.94575414 -1.95680608 -1.96981341
+ -1.97923304 -1.97500048 -2.00380636 -1.96838774 -1.98940744 -1.98695238
+ -1.99444467 -1.99887955 -2.00498359 -1.98170047 -1.99333241 -1.73884316]
+out/mesh_one_ellipse_2_1_50
+used gn 10
+out/mesh_one_ellipse_2_1_50
+[-1.92328738 -1.97336476 -1.98705427 -1.99249722 -1.9941497  -1.99627168
+ -2.00320611 -1.99105791 -2.01682316 -1.97808103 -1.99939492 -1.99774228
+ -1.99987823 -2.00098443 -2.00986266 -1.98619739 -1.9995809  -1.99948914]
